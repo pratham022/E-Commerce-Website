@@ -1,0 +1,37 @@
+{% extends 'shop/basic.html' %}
+{% block title%} My Awesome Cart Tracker{% endblock %}
+{% block body %}
+<div class="container">
+<!--    {{response}}-->
+    <div class="col my-4">
+
+        <h2>Payment status regarding your order Id {{response.ORDERID}}</h2>
+        {% if response.RESPCODE == '01' %}
+        ORDER SUCCESS
+        {% else %}
+        ORDER FAILURE
+        {% endif%}
+        <input type="hidden" id="decisionMaker" value="{{ response.RESPCODE }}">
+        <h3 id="thankmsg"></h3>
+        <h3 id="remembermsg"></h3>
+
+    </div>
+
+</div>
+{% endblock %}
+{% block js %}
+<script>
+    var decision = $('#decisionMaker').val()
+    if(decision == '01')
+    {
+        localStorage.clear();
+        $('#thankmsg').text('Thank You for shopping with us!');
+        $('#remembermsg').text('Remember your Order-Id for tracking your order.');
+    }
+    else
+    {
+        $('#thankmsg').text('Sorry, we could not register your order!!');
+        $('#remembermsg').text('Please visit the checkout page when you wish to make payment!');
+    }
+</script>
+{% endblock %}

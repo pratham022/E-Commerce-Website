@@ -1,0 +1,29 @@
+{% extends 'shop/basic.html' %}
+
+{% block title %} {{ product.product_name }} {% endblock %}
+
+
+{% block css %}
+{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="demo">
+        <div class="row" style="margin-top: 150px;">
+            <div class="col-md-4">
+                <img src="/media/{{ product.image }}" style="height: 60vh; width: 20vw;" />
+            </div>
+            <div class="col-md-8">
+                <h1 id="namepr{{ product.id }}">{{ product.product_name }}</h1>
+                <h4> M.R.P.: <span id="pricepr{{ product.id }}">{{ product.price }}</span></h4>
+                <h4>{{ product.desc }}</h4>
+                <h4> Published on: {{ product.pub_date }}</h4>
+                <a href="#" class="btn btn-primary cart">Buy Now</a>
+                <span id="divpr{{ product.id }}" class="divpr">
+                    <a class="btn btn-primary cart" id="pr{{product.id}}">Add To Cart</a>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

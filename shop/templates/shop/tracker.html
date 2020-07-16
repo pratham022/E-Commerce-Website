@@ -1,0 +1,167 @@
+{% extends 'shop/basic.html' %}
+
+
+{% block title %} Tracker {% endblock %}
+
+
+{% block css %}
+.cart-items
+{
+  position: relative;
+}
+.item-quant
+{
+  position: absolute;
+  left: 500px;
+}
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+      <div class="order-details mt-5 col-md-10">
+        <form method="POST"  id="trackerform"> {% csrf_token %}
+            <h3>Track Your Order!</h3>
+            <div class="form-row">
+                <div class="form-group col-md-6">
+                    <label for="orderId">Order Id</label>
+                    <input type="text" class="form-control" id="orderId" name="orderId">
+                </div>
+                <div class="form-group col-md-6">
+                    <label for="emailId">E-mail</label>
+                    <input type="email" class="form-control" id="emailId" name="emailId">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-primary">Track Order</button>
+        </form>
+      </div>
+      <div class="order-tracker mt-5 col-md-10">
+        <h3>Your Order Status</h3>
+        <ul id="items">
+          {{ response }}
+        </ul>
+      </div>
+      <div class="order-details mt-5 col-md-10">
+          <h3>Your Order Details</h3>
+<!--        <div class="row" id="outer-div">-->
+
+<!--          -->
+<!--        </div>-->
+        <ul id="order-items" style="position: relative;">
+        </ul>
+      </div>
+    </div>
+
+{% endblock %}
+
+{% block js %}
+<script>
+  $("#trackerform").submit(function(event){
+
+    console.log("form submitted");
+    $("#items").empty();
+    $('#order-items').empty();
+    var formData = {
+      'orderId': $("#orderId").val(),
+      'emailId': $("#emailId").val(),
+      'csrfmiddlewaretoken': $("input[name=csrfmiddlewaretoken]").val()
+    }
+    console.log(formData)
+    $.ajax({
+      type: "POST",
+      url: "/shop/tracker/",
+      data: formData,
+      encode: true
+
+    })
+    .done(function(data){
+      console.log("In done")
+      console.log(data)
+      try
+      {
+        var data2 = JSON.parse(data);
+        var updates = data2[0];
+        console.log(typeof(updates))
+        console.log(updates)
+        for(var i=0;i<updates.length;i++)
+        {
+          let text = updates[i]['text'];
+          let time = updates[i]['time'];
+
+          mystr = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                    ${text}
+                    <span class="badge badge-primary badge-pill">${time}</span>
+                  </li> `
+          $("#items").append(mystr);
+        }
+
+        // for displaying order detailsevent.prevent.preventDefault();eventDefault();
+
+        console.log("Parsed data is "+data2);
+        var items_list = JSON.parse(data2[1]);
+        console.log("Items list "+items_list);
+        console.log(typeof(items_list))
+        // for(item in items_list)
+        // {
+        //   // console.log(item);
+        //   let item_name = items_list[item][1];
+        //   let item_quant = items_list[item][0];
+        //   console.log(item_name + " "+ item_quant);
+        //   mystr2 = `<li class="list-group-item d-flex justify-content-between align-items-center">
+        //             ${item_name}
+        //             <span class="badge badge-primary badge-pill">${item_quant}</span>
+        //           </li> `
+        //   $("#order-items").append(mystr2);
+        // }
+
+        //$("#outer-div").append('<h5 style="margin-left: 620px; margin-top: 10px;">Price</h5>');
+
+        let total_qty = 0;
+        let total_bill = 0;
+        for(var item in items_list)
+        {
+          let item_name = items_list[item][1];
+          let item_qty = items_list[item][0];
+          let item_cost = items_list[item][2];
+          total_qty += item_qty;
+          item_cost = Number(item_cost);
+          item_cost = item_cost*item_qty;
+          total_bill += item_cost;
+
+          mystr2 = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                      ${item_name}
+                        <span class="badge badge-primary badge-pill" style="position: absolute; left: 500px">${item_qty}</span>
+                        <span>
+                          <h5><span class="">${item_cost}</span></h5>
+                        </span>
+                    </li> `
+
+          $("#order-items").append(mystr2);
+
+        }
+        bill = `<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: rgb(209, 237, 242)">
+                      <strong> Total Bill </strong>
+                        <span class="badge badge-primary badge-pill" style="position: absolute; left: 500px">${total_qty}</span>
+                        <span>
+                          <h5><span class=""><b>INR ${total_bill}</b></span></h5>
+                        </span>
+                    </li> `
+        $("#order-items").append(bill);
+
+
+      }
+      catch(err)
+      {
+        mystr = `<li class="list-group-item d-flex justify-content-between align-items-center" style="background-color: rgb(255, 204, 203)">
+                    Sorry, We could not fetch the order. Make sure you entered correct details
+                  </li> `
+        $("#items").append(mystr);
+      }
+
+
+
+    })
+    event.preventDefault();
+  })
+</script>
+
+{% endblock %}
